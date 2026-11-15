@@ -1,6 +1,17 @@
-__pycache__/
+# =========================
+# Python Bytecode & Cache
+pycache/
 *.pyc
+
+# =========================
+# Virtual Environment
 .venv/
+
+# =========================
+# Flask Instance & Database
 instance/
 *.db
+
+# =========================
+# Environment Variables (Secrets & API Keys)
 .env
