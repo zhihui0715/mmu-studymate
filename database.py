@@ -1,85 +1,131 @@
-"""database.py - everything that touches SQLite (the database)."""
-import sqlite3                      # built-in: talks to SQLite
-from pathlib import Path            # built-in: works with folders and files
+"""database.py - everything that touches SQLite.
 
-import click                        # third-party (comes with Flask): makes terminal commands
-from flask import current_app, g    # current_app = the running app, g = storage for one request
+Shared file: each member edits ONLY their own marked section.
+Safety rules: every query has "WHERE ... user_id = ?" and every value goes in through a ? placeholder.
+Changed a table? Delete instance/studymate.db and run the app again.
+"""
+import sqlite3                              # built-in: talks to SQLite
+from pathlib import Path                    # built-in: folders and files
+
+import click                                # third-party (comes with Flask): terminal commands
+from flask import current_app, g            # current_app = running app, g = storage for one request
+
+from data import DEFAULT_SUBJECTS           # project file (Tan)
 
 
 # ---------- the tables ----------
-# IF NOT EXISTS: only creates missing tables, so running it again is safe.
 SCHEMA = """
+-- ===== [OWNER: Zhi Hui] users =====
 CREATE TABLE IF NOT EXISTS users (
     id              INTEGER PRIMARY KEY,
     name            TEXT NOT NULL,
     email           TEXT NOT NULL UNIQUE,
-    password_hash   TEXT NOT NULL,
+    password_hash   TEXT NOT NULL,                        -- never the real password
     course          TEXT NOT NULL DEFAULT 'Foundation in Computing and Informatics',
     semester        TEXT NOT NULL DEFAULT 'Semester 1'
+);
+
+-- ===== [OWNER: Tan Yu Zhe] subjects and tasks =====
+CREATE TABLE IF NOT EXISTS subjects (
+    id        INTEGER PRIMARY KEY,
+    user_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    code      TEXT NOT NULL,
+    name      TEXT NOT NULL,
+    lecturer  TEXT NOT NULL DEFAULT 'Lecturer',
+    weight    REAL NOT NULL DEFAULT 1,                      -- used by Kong's workload score
+    color     TEXT NOT NULL DEFAULT '#9BE15D'
+);
+
+CREATE TABLE IF NOT EXISTS tasks (
+    id           INTEGER PRIMARY KEY,
+    user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    subject_id   INTEGER NOT NULL REFERENCES subjects(id) ON DELETE CASCADE,
+    name         TEXT NOT NULL,
+    description  TEXT NOT NULL DEFAULT '',
+    type         TEXT NOT NULL,
+    due          TEXT NOT NULL,                             -- e.g. 2026-12-05
+    priority     TEXT NOT NULL,
+    status       TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'prog', 'done')),
+    finished_on  TEXT NOT NULL DEFAULT '',
+    xp_given     INTEGER NOT NULL DEFAULT 0,
+    est_hours    REAL NOT NULL DEFAULT 0 CHECK (est_hours >= 0)   -- read by Kong's planner
+);
+
+-- ===== [OWNER: Kong Fu Sheng] journal =====
+CREATE TABLE IF NOT EXISTS journal (
+    user_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    day       TEXT NOT NULL,
+    mood      INTEGER NOT NULL CHECK (mood BETWEEN 1 AND 5),
+    went_well TEXT NOT NULL DEFAULT '',
+    improve   TEXT NOT NULL DEFAULT '',
+    hours     REAL NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, day)                              -- one entry per user per day
 );
 """
 
 
-# ---------- set-up: opening the database ----------
+# ---------- [OWNER: Zhi Hui] set-up ----------
 
 def get_db():
     """One connection per request, opened on first use."""
     if 'db' not in g:
-        g.db = sqlite3.connect(current_app.config['DATABASE'])   # path from app.py
-        g.db.row_factory = sqlite3.Row                           # rows act like dicts: row['email']
-        g.db.execute('PRAGMA foreign_keys = ON')                 # SQLite ignores foreign keys unless asked
+        g.db = sqlite3.connect(current_app.config['DATABASE'])
+        g.db.row_factory = sqlite3.Row                     # rows act like dicts: row['email']
+        g.db.execute('PRAGMA foreign_keys = ON')           # needed for ON DELETE CASCADE
     return g.db
 
 
 def close_db(error=None):
-    """Closes the connection when the request ends."""
     db = g.pop('db', None)
     if db is not None:
         db.close()
 
 
 def init_db():
-    """Creates any missing tables."""
-    db = get_db()
-    db.executescript(SCHEMA)                # runs all the SQL in SCHEMA
+    get_db().executescript(SCHEMA)
 
 
 def init_app(app):
-    """Called once from app.py: makes the instance folder, the tables, and `flask init-db`."""
-    Path(app.config['DATABASE']).parent.mkdir(parents=True, exist_ok=True)  # creates instance/
-    app.teardown_appcontext(close_db)       # close the connection after every request
+    """Called once from app.py: makes instance/, the tables, and `flask init-db`."""
+    Path(app.config['DATABASE']).parent.mkdir(parents=True, exist_ok=True)
+    app.teardown_appcontext(close_db)
 
-    with app.app_context():                 # get_db() needs a running app
+    with app.app_context():
         init_db()
 
-    @app.cli.command('init-db')             # adds the terminal command: flask init-db
+    @app.cli.command('init-db')
     def init_db_command():
         init_db()
         click.echo('Database ready.')
 
 
-# Shortcuts: _one() = first row as a dict (or None), _all() = every row as a list of dicts.
-
 def _one(sql, params=()):
+    """First row as a dict, or None."""
     row = get_db().execute(sql, params).fetchone()
     return dict(row) if row else None
 
 
 def _all(sql, params=()):
+    """Every row as a list of dicts."""
     return [dict(row) for row in get_db().execute(sql, params).fetchall()]
 
 
-# ---------- users ----------
-# Every value goes in through ? placeholders, never string gluing: this blocks SQL injection.
+# ---------- [OWNER: Zhi Hui] users ----------
 
 def create_user(name, email, password_hash):
-    """Saves a new account. Returns the new user id."""
+    """Saves a new account (plus its default subjects). Returns the new user id."""
     db = get_db()
     cursor = db.execute(
         'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)', (name, email, password_hash)
     )
-    db.commit()                             # save the change to the file
-    return cursor.lastrowid                 # the id SQLite gave the new row
+    user_id = cursor.lastrowid
+    # [OWNER: Tan Yu Zhe] every new account starts with the 14 MMU subjects
+    db.executemany(
+        'INSERT INTO subjects (user_id, code, name, lecturer, weight, color) VALUES (?, ?, ?, ?, ?, ?)',
+        [(user_id, *subject) for subject in DEFAULT_SUBJECTS],
+    )
+    db.commit()
+    return user_id
 
 
 def get_user(user_id):
@@ -90,16 +136,63 @@ def get_user_by_email(email):
     return _one('SELECT * FROM users WHERE email = ?', (email,))
 
 
-def update_profile(user_id, name, email, course, semester):
+# ---------- [OWNER: Tan Yu Zhe] subjects ----------
+
+def list_subjects(user_id):
+    return _all('SELECT * FROM subjects WHERE user_id = ? ORDER BY id', (user_id,))
+
+
+def get_subject(user_id, subject_id):
+    return _one('SELECT * FROM subjects WHERE id = ? AND user_id = ?', (subject_id, user_id))
+
+
+def add_subject(user_id, code, name, lecturer, weight, color):
     db = get_db()
     db.execute(
-        'UPDATE users SET name = ?, email = ?, course = ?, semester = ? WHERE id = ?',
-        (name, email, course, semester, user_id),
+        'INSERT INTO subjects (user_id, code, name, lecturer, weight, color) VALUES (?, ?, ?, ?, ?, ?)',
+        (user_id, code, name, lecturer, weight, color),
     )
     db.commit()
 
 
-def set_password_hash(user_id, password_hash):
+def update_subject(user_id, subject_id, code, name, lecturer, weight, color):
+    """AND user_id = ? means you can only edit your own subjects."""
     db = get_db()
-    db.execute('UPDATE users SET password_hash = ? WHERE id = ?', (password_hash, user_id))
+    db.execute(
+        'UPDATE subjects SET code = ?, name = ?, lecturer = ?, weight = ?, color = ? WHERE id = ? AND user_id = ?',
+        (code, name, lecturer, weight, color, subject_id, user_id),
+    )
+    db.commit()
+
+
+def delete_subject(user_id, subject_id):
+    """Also deletes the subject's tasks (ON DELETE CASCADE)."""
+    db = get_db()
+    db.execute('DELETE FROM subjects WHERE id = ? AND user_id = ?', (subject_id, user_id))
+    db.commit()
+
+
+# ---------- [OWNER: Kong Fu Sheng] journal ----------
+
+def get_journal_entry(user_id, day):
+    return _one('SELECT * FROM journal WHERE user_id = ? AND day = ?', (user_id, day))
+
+
+def recent_journal(user_id, limit=7):
+    return _all('SELECT * FROM journal WHERE user_id = ? ORDER BY day DESC LIMIT ?', (user_id, limit))
+
+
+def has_journal_entry(user_id, day):
+    return get_journal_entry(user_id, day) is not None
+
+
+def save_journal_entry(user_id, day, mood, went_well, improve, hours):
+    """Adds the day's entry, or UPDATES it if that day already has one (ON CONFLICT)."""
+    db = get_db()
+    db.execute(
+        'INSERT INTO journal (user_id, day, mood, went_well, improve, hours) VALUES (?, ?, ?, ?, ?, ?) '
+        'ON CONFLICT(user_id, day) DO UPDATE SET mood = excluded.mood, went_well = excluded.went_well, '
+        'improve = excluded.improve, hours = excluded.hours',
+        (user_id, day, mood, went_well, improve, hours),
+    )
     db.commit()
