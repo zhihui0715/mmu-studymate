@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Sign up{% endblock %}
+{% block auth %}
+<div class="au">
+  <div class="card ac">
+    <div class="stage"><img class="mascot" src="{{ url_for('static', filename='img/mascot.png') }}" width="150" height="135" alt="StudyMate mascot" /></div>
+    <h1><img class="mmu-logo big" src="{{ url_for('static', filename='img/mmu-logo.png') }}" alt="MMU" /> StudyMate</h1>
+    <p class="sub">Plan your subjects, beat your deadlines, build your streak.</p>
+    <form method="post" novalidate>
+      <label class="fl">Full name<input name="name" type="text" value="{{ name }}" placeholder="e.g. Ali bin Ahmad" autocomplete="name" /></label>
+      <label class="fl">Email<input name="email" type="email" value="{{ email }}" placeholder="name@student.mmu.edu.my" autocomplete="email" /></label>
+      <label class="fl">Password<span class="pw"><input name="password" type="password" placeholder="At least 8 characters" autocomplete="new-password" /></span>
+        <span class="hint">8 to 128 characters. Do not reuse your MMU or Gmail password.</span></label>
+      <label class="fl">Confirm password<span class="pw"><input name="password2" type="password" placeholder="Type it again" autocomplete="new-password" /></span></label>
+      <div class="err" role="alert">{{ error }}</div>
+      <button class="btn wide">Create account</button>
+    </form>
+    <p class="sub" style="margin-top: 12px">Already registered? <a href="{{ url_for('account.login') }}">Log in</a></p>
+    <p class="sub"><a href="{{ url_for('account.home') }}">&larr; Back to welcome page</a></p>
+  </div>
+</div>
+{% endblock %}
