@@ -1,7 +1,7 @@
 """app.py - the starting point of StudyMate (Flask + SQLite)."""
 import os                   # built-in: file paths + environment variables
 from flask import Flask     # third-party: creates the web app
-
+import database             # project file: our database.py
 
 # ---------- 1. the app and its settings ----------
 
