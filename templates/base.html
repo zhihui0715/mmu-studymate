@@ -1,0 +1,5 @@
+<!doctype html>
+<title>{% block title %}{% endblock %} - StudyMate</title>
+{% if user %}{% block content %}{% endblock %}{% else %}{% block auth %}{% endblock %}{% endif %}
+{% for m in get_flashed_messages() %}<p>{{ m }}</p>{% endfor %}
+<script src="{{ url_for('static', filename='js/password.js') }}"></script>
