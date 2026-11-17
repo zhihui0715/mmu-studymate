@@ -1,10 +1,122 @@
-<!doctype html>
-<title>StudyMate</title>
-<h1>MMU StudyMate</h1>
-{% if g.user %}
-  <p>Logged in as {{ g.user.name }} ({{ g.user.email }})</p>
-  <form method="post" action="{{ url_for('account.logout') }}"><button>Log out</button></form>
-{% else %}
-  <a href="{{ url_for('account.login') }}">Log in</a> |
-  <a href="{{ url_for('account.signup') }}">Sign up</a>
-{% endif %}
+{# landing.html - the welcome page people see before they log in or sign up.
+   The "preview" card is a static picture of the Task board with sample data, not live data.
+   The "facts" section is left out for now: it needs skins and daily_cap from the Rewards feature. #}
+{% extends "base.html" %}
+{% block title %}Welcome{% endblock %}
+{% block auth %}
+<div class="land">
+
+  <header class="land-nav">
+    <a class="land-logo" href="{{ url_for('account.home') }}"><img class="mmu-logo" src="{{ url_for('static', filename='img/mmu-logo.png') }}" alt="MMU" /> StudyMate</a>
+    <nav class="land-links" aria-label="Page sections">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+    </nav>
+    <div class="land-cta">
+      <a class="btn g" href="{{ url_for('account.login') }}">Log in</a>
+      <a class="btn" href="{{ url_for('account.signup') }}">Sign up</a>
+    </div>
+  </header>
+
+  <!-- hero -->
+  <section class="hero">
+    <div class="hero-text">
+      <span class="chip">Made for MMU students</span>
+      <h1>Plan your trimester. Finish your tasks. Level up.</h1>
+      <p class="hero-sub">
+        MMU StudyMate keeps your assignments, tests and deadlines in one place, tells you what to do first,
+        and turns finished study work into XP, levels and badges.
+      </p>
+      <div class="hero-btns">
+        <a class="btn big-btn" href="{{ url_for('account.signup') }}">Create a free account</a>
+        <a class="btn g big-btn" href="{{ url_for('account.login') }}">I already have one</a>
+      </div>
+      <p class="mu">Works in your browser. No download needed.</p>
+      <img class="mascot hero-mascot" src="{{ url_for('static', filename='img/mascot.png') }}" width="220" height="198" alt="StudyMate mascot" />
+    </div>
+
+    <!-- static preview of the Task board -->
+    <div class="preview" aria-label="Preview of the Task board with sample tasks">
+      <div class="preview-bar"><i></i><i></i><i></i><span class="mu">Task board (sample)</span></div>
+      <div class="preview-cols">
+        <div class="pcol">
+          <h3>To do <span>2</span></h3>
+          <div class="pcard"><b>Essay outline</b><span class="mu"><i class="dot" style="background: #ffb020"></i>CEN1123 · Assignment</span><span class="od">Needs attention</span></div>
+          <div class="pcard"><b>Matrices test</b><span class="mu"><i class="dot" style="background: #ff7eb6"></i>CMA1123 · Test</span><span class="mu">5 days remaining</span></div>
+        </div>
+        <div class="pcol">
+          <h3>In progress <span>1</span></h3>
+          <div class="pcard"><b>Python loops quiz</b><span class="mu"><i class="dot" style="background: #4dc3ff"></i>CCP1123 · Quiz</span><span class="mu">Due today</span></div>
+        </div>
+        <div class="pcol">
+          <h3>Completed <span>1</span></h3>
+          <div class="pcard done"><b>Read chapter 3</b><span class="mu"><i class="dot" style="background: #ff7eb6"></i>CMA1123 · Study task</span><span class="mu">+XP earned</span></div>
+        </div>
+      </div>
+      <div class="preview-level">
+        <img class="mascot" src="{{ url_for('static', filename='img/mascot.png') }}" width="54" height="49" alt="" />
+        <div class="grow">
+          <b>Level 1</b> <span class="mu">🔥 3 days</span>
+          <div class="bar"><i style="width: 80%"></i></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- features -->
+  <section id="features" class="land-sec">
+    <h2>Everything a trimester asks of you, in one place</h2>
+    <p class="sub">Each page in the app covers one job.</p>
+    <div class="feat-grid">
+      <article class="card feat">
+        <h3>Task board</h3>
+        <p class="mu">Drag tasks between To do, In progress and Completed. Filter by subject, priority, type, status or date.</p>
+      </article>
+      <article class="card feat">
+        <h3>Smart "today's focus"</h3>
+        <p class="mu">The dashboard picks your top 3 tasks from deadline, priority and subject weight. Exam weeks count extra.</p>
+      </article>
+      <article class="card feat">
+        <h3>Trimester week tracker</h3>
+        <p class="mu">Set your first day and see which teaching week, study leave or exam period you are in.</p>
+      </article>
+      <article class="card feat">
+        <h3>Study planner</h3>
+        <p class="mu">Give each task an estimate and it spreads your study hours over the days before each deadline.</p>
+      </article>
+      <article class="card feat">
+        <h3>Friends and leaderboard</h3>
+        <p class="mu">Add classmates as friends and compare weekly XP. Your tasks and subjects stay private.</p>
+      </article>
+      <article class="card feat">
+        <h3>Calendar, journal and insights</h3>
+        <p class="mu">See deadlines by day, write a short daily summary with your mood, and see your mood, study time and progress in charts.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- how it works -->
+  <section id="how" class="land-sec">
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="card step"><span class="num">1</span><b>Add your subjects and tasks</b><p class="mu">Put in what is due and when. Subjects have colours and weights.</p></div>
+      <div class="card step"><span class="num">2</span><b>Do the top task first</b><p class="mu">Follow the study planner and tick off tasks on your board.</p></div>
+      <div class="card step"><span class="num">3</span><b>Earn XP and level up</b><p class="mu">Your level rises, your streak builds, and badges unlock.</p></div>
+    </div>
+  </section>
+
+  <!-- final call to action -->
+  <section class="land-end card">
+    <h2>Ready for a calmer trimester?</h2>
+    <p class="sub">It takes about a minute to sign up.</p>
+    <div class="hero-btns" style="justify-content: center">
+      <a class="btn big-btn" href="{{ url_for('account.signup') }}">Sign up</a>
+      <a class="btn g big-btn" href="{{ url_for('account.login') }}">Log in</a>
+    </div>
+  </section>
+
+  <footer class="land-foot mu">
+    MMU StudyMate · A student project for CSP1123 Mini IT Project. Not an official MMU service.
+  </footer>
+</div>
+{% endblock %}

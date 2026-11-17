@@ -49,6 +49,10 @@ def load_user():
         else:
             g.user = user                   # every route and template can now use g.user
 
+@app.context_processor                      # values every template can use
+def inject_globals():
+    return {'user': g.get('user')}          # base.html checks "user" to pick logged-in or logged-out layout
+
 
 # ---------- start the server (always last) ----------
 

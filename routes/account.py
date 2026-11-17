@@ -13,9 +13,9 @@ bp = Blueprint('account', __name__)              # a group of routes; page names
 
 @bp.route('/')
 def home():
-    # TODO: when Kong's dashboard is merged, send logged-in users to url_for('dashboard.dashboard')
+    if g.user:
+        return redirect(url_for('account.profile'))  # TODO: dashboard.dashboard when Kong's is merged
     return render_template('landing.html')
-
 
 @bp.route('/login', methods=['GET', 'POST'])     # GET = show the form, POST = form was submitted
 def login():
