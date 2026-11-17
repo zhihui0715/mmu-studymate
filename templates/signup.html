@@ -1,0 +1,12 @@
+<!doctype html>
+<title>Sign up</title>
+<h1>Sign up</h1>
+{% if error %}<p style="color:red">{{ error }}</p>{% endif %}
+<form method="post">
+  <input name="name" placeholder="Name" value="{{ name }}">
+  <input name="email" type="email" placeholder="Email" value="{{ email }}">
+  <input name="password" type="password" placeholder="Password (8+ characters)">
+  <input name="password2" type="password" placeholder="Repeat password">
+  <button>Sign up</button>
+</form>
+<a href="{{ url_for('account.login') }}">Have an account? Log in</a>

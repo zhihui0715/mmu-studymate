@@ -1,0 +1,10 @@
+<!doctype html>
+<title>StudyMate</title>
+<h1>MMU StudyMate</h1>
+{% if g.user %}
+  <p>Logged in as {{ g.user.name }} ({{ g.user.email }})</p>
+  <form method="post" action="{{ url_for('account.logout') }}"><button>Log out</button></form>
+{% else %}
+  <a href="{{ url_for('account.login') }}">Log in</a> |
+  <a href="{{ url_for('account.signup') }}">Sign up</a>
+{% endif %}
