@@ -1,3 +1,4 @@
+{# login.html - log in form.                                    [OWNER: Zhi Hui] #}
 {% extends "base.html" %}
 {% block title %}Log in{% endblock %}
 {% block auth %}
@@ -8,6 +9,7 @@
     <p class="sub">Plan your subjects, beat your deadlines, build your streak.</p>
     <form method="post" novalidate>
       <label class="fl">Email<input name="email" type="email" value="{{ email }}" placeholder="name@student.mmu.edu.my" autocomplete="email" /></label>
+      {# class="pw" adds the Show / Hide button (static/js/password.js) #}
       <label class="fl">Password<span class="pw"><input name="password" type="password" placeholder="Your password" autocomplete="current-password" /></span></label>
       <div class="err" role="alert">{{ error }}</div>
       <button class="btn wide">Log in</button>
