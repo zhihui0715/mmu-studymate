@@ -6,7 +6,8 @@ Run:  python -m flask run --debug
 import os                                   # built-in: file paths + environment variables
 from datetime import date                   # built-in: today's date
 
-from flask import Flask, g, session         # third-party: app, per-request storage, login cookie
+from flask import Flask, g, session         # third-party: app, per-request storage, login cookie 
+
 
 import database                             # project file
 from routes import ALL_BLUEPRINTS           # project file
@@ -19,7 +20,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))   # full path of the project f
 app = Flask(__name__, instance_path=os.path.join(HERE, 'instance'))   # instance/ holds the database
 
 app.config.update(
-    SECRET_KEY=os.environ.get('SECRET_KEY', 'dev-only-change-me'),  # signs the login cookie (签名)
+    SECRET_KEY=os.environ.get('SECRET_KEY', 'dev-only-change-me'),  # signs the login cookie 
     DATABASE=os.path.join(app.instance_path, 'studymate.db'),       # full path to the SQLite file
     SESSION_COOKIE_SAMESITE='Lax',                                  # blocks cross-site form attacks (CSRF)
 )
