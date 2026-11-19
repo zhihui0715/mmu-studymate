@@ -1,0 +1,843 @@
+/* [OWNER: Tan Yu Zhe] */
+/* ======================================================================
+   MMU StudyMate - style.css (every page uses this one file)
+   WEEK 2 VERSION: only the styles the W2 pages use (welcome, log in, sign up, subjects, journal).
+   Sections here: 1 theme  2 base  3 layout  4 components  5 login/sign up  6 toast message
+                  8 responsive  9 links styled as buttons  10 journal moods  12 welcome page  15 password box
+   The missing numbers (7 kanban, 11 friends, 13 profile week box, 14 planner/insights) and the rest
+   of 6 (calendar, progress ring, rewards grid) are added in the week their pages are built.
+
+   CODE STYLE (spacing rules used in this file)
+     - 2 spaces per indent level, no tabs.
+     - One declaration per line, always ending with a semicolon.
+     - ONE blank line between rules.
+     - TWO blank lines before each numbered section banner (the "===== N." comments).
+     - A comment sits directly above the rule it explains.
+   ====================================================================== */
+
+
+/* ===== 1. THEME VARIABLES =====
+   Every colour is a CSS variable. base.html overwrites --accent, --ink and --tint with the
+   colours of the vibe the student picked, so the whole UI recolours without touching other CSS.
+   The app is light only. --at is the accent used for TEXT (darker, so it stays readable on white). */
+
+:root {
+  --accent: #00ff9c;
+  --ink: #04140c;
+  --tint: #0b0f0d;
+  --bg: color-mix(in srgb, var(--accent) 5%, #f7f7f8);
+  --sf: #fff;
+  --ln: color-mix(in srgb, var(--accent) 14%, #e8e8ec);
+  --tx: #16201b;
+  --mu: #5d6b64;
+  --at: color-mix(in srgb, var(--accent) 55%, #000);
+  --dg: #ff4d6d;
+  --shadow: 0 1px 2px rgb(20 20 40 / 0.04), 0 4px 16px rgb(20 20 40 / 0.04);
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+
+/* ===== 2. BASE ===== */
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--tx);
+  font:
+    500 15px/1.5 Nunito,
+    system-ui,
+    sans-serif;
+  min-height: 100vh;
+}
+
+button,
+
+input,
+
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+
+input:focus-visible,
+
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+
+/* ===== 3. LAYOUT: page container, header, level strip, tabs ===== */
+
+/* Wide enough to fill a normal laptop or desktop screen, but capped so lines never get too long */
+.app {
+  max-width: 1720px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 2.5vw, 40px) 60px;
+}
+
+/* Top bar stays pinned while the page scrolls, with a slightly see-through background */
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  margin-bottom: 20px;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--ln);
+}
+
+/* Semester, Sound and Log out sit together on the right of the top bar */
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.top-actions form {
+  margin: 0;
+}
+
+.chip {
+  border: 1px solid var(--ln);
+  border-radius: 99px;
+  padding: 5px 12px;
+  background: var(--sf);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font:
+    12px "Press Start 2P",
+    monospace;
+  color: var(--at);
+}
+
+/* The MMU logo (static/img/mmu-logo.png) sits on a small white pill so its blue and red stay readable on dark themes */
+.mmu-logo {
+  height: 22px;
+  width: auto;
+  padding: 3px 6px;
+  border-radius: 8px;
+  background: #fff;
+  vertical-align: middle;
+}
+
+.mmu-logo.big {
+  height: 30px;
+}
+
+/* The StudyMate mascot (static/img/mascot.png): bob = a gentle idle float */
+.mascot {
+  height: auto;
+  flex: none;
+  /* mascot.png has a stray speck at the very bottom: crop the image to the drawing only */
+  aspect-ratio: 480 / 400;
+  object-fit: cover;
+  object-position: top;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 45%, transparent));
+  animation: bob 2.4s ease-in-out infinite;
+}
+
+.hero-mascot {
+  display: block;
+  margin-top: 18px;
+  max-width: 60%;
+}
+
+@keyframes bob {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+.mascot {
+    animation: none;
+  }
+}
+
+.ico {
+  background: none;
+  border: 1px solid var(--ln);
+  border-radius: 99px;
+  padding: 5px 12px;
+  font-weight: 700;
+  color: var(--mu);
+}
+
+.card {
+  background: var(--sf);
+  border: 1px solid var(--ln);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.grow {
+  flex: 1;
+  min-width: 180px;
+}
+
+.bar {
+  height: 10px;
+  background: var(--ln);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 3px;
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 99px;
+  transition: width 0.5s;
+}
+
+.mu {
+  color: var(--mu);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Page grid. Wide: menu | page | level card. Medium: level card on top, menu | page. Small: one column. */
+.shell {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr) 260px;
+  grid-template-areas: "nav main rail";
+  gap: 16px;
+  align-items: start;
+}
+
+.shell > main {
+  grid-area: main;
+  min-width: 0;
+}
+
+.rail {
+  grid-area: rail;
+  position: sticky;
+  top: 76px;
+}
+
+/* Left menu: stays in view while the page scrolls, so every tab is always visible */
+.tabs {
+  grid-area: nav;
+  position: sticky;
+  top: 76px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+/* Current page: soft tint + accent text + a small bar on the left, instead of a solid block */
+.tab[aria-current="true"] {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--at);
+}
+
+.tab[aria-current="true"]::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+h1,
+
+h2 {
+  margin: 4px 0;
+}
+
+h2 {
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+
+.sub {
+  color: var(--mu);
+  font-weight: 700;
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+
+
+/* ===== 4. SHARED COMPONENTS: buttons, stat cards, form fields ===== */
+
+.btn {
+  background: var(--accent);
+  color: var(--ink);
+  border: 0;
+  border-radius: 99px;
+  padding: 8px 18px;
+  font-weight: 800;
+}
+
+.btn.g {
+  background: none;
+  color: var(--at);
+  border: 2px solid var(--accent);
+}
+
+.btn.wide {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.g4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+@keyframes in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+.dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.od {
+  color: var(--dg);
+  font-weight: 800;
+}
+
+.del {
+  background: none;
+  border: 0;
+  color: var(--mu);
+  opacity: 0.4;
+}
+
+.fl {
+  display: block;
+  margin-top: 10px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.fl input,
+.fl select,
+.fl textarea {
+  display: block;
+  width: 100%;
+  background: var(--bg);
+  border: 2px solid var(--ln);
+  border-radius: 14px;
+  padding: 9px 12px;
+  margin-top: 3px;
+}
+
+/* Inline validation message under forms */
+.err {
+  color: var(--dg);
+  font-weight: 800;
+  font-size: 13px;
+  min-height: 18px;
+  margin-top: 6px;
+}
+
+
+/* ===== 5. LOGIN / SIGN UP SCREEN ===== */
+
+.au {
+  min-height: 90vh;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.ac {
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+}
+
+.ac .fl {
+  text-align: left;
+}
+
+.stage {
+  display: flex;
+  justify-content: center;
+}
+
+a {
+  color: var(--at);
+  font-weight: 800;
+}
+
+
+/* ===== 6. CALENDAR, PROGRESS RING, REWARDS GRID ===== */
+
+/* Small pop-up message at the bottom of the screen */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: var(--ink);
+  padding: 10px 20px;
+  border-radius: 99px;
+  font-weight: 800;
+  z-index: 30;
+  max-width: 92vw;
+  text-align: center;
+}
+
+
+/* ===== 8. RESPONSIVE + ACCESSIBILITY ===== */
+
+/* Big screens: give the menu and the level card more room and space things out */
+@media (min-width: 1500px) {
+.shell {
+    grid-template-columns: 220px minmax(0, 1fr) 300px;
+    gap: 24px;
+  }
+}
+
+/* Medium screens: level card goes back to a wide strip above the page */
+@media (max-width: 1100px) {
+.shell {
+    grid-template-columns: 170px minmax(0, 1fr);
+    grid-template-areas:
+      "rail rail"
+      "nav main";
+  }
+
+.rail {
+    position: static;
+  }
+}
+
+/* Small screens: the menu becomes one scrolling row of pills again */
+@media (max-width: 800px) {
+.shell {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "rail"
+      "nav"
+      "main";
+  }
+
+.tabs {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 8px;
+  }
+
+.tab {
+    background: var(--sf);
+    border-color: var(--ln);
+    border-radius: 99px;
+    padding: 7px 14px;
+  }
+
+.tab[aria-current="true"]::before {
+    display: none;
+  }
+}
+
+/* Users who ask their device for less motion get no animation (fireworks are skipped in JS too) */
+@media (prefers-reduced-motion: reduce) {
+* {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+
+/* ===== 9. LINKS STYLED AS BUTTONS =====
+   The menu tabs and some buttons are <a href> links to other pages.
+   These rules remove the default underline so they look like buttons. */
+
+a.tab,
+a.btn {
+  text-decoration: none;
+  display: inline-block;
+}
+
+a.tab {
+  color: var(--tx);
+}
+
+a.tab[aria-current="true"] {
+  color: var(--at);
+}
+
+/* the menu items are flex rows (icon + label), not inline blocks */
+a.tab {
+  display: flex;
+}
+
+
+/* ===== 10. JOURNAL MOOD FACES =====
+   Each mood face is a radio button (no JavaScript needed). The round radio circle is hidden
+   and the label around it is styled as a big face button. */
+
+.mood label {
+  font-size: 26px;
+  background: var(--bg);
+  border: 2px solid var(--ln);
+  border-radius: 16px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.mood label:has(input:checked) {
+  border-color: var(--accent);
+  transform: scale(1.15);
+}
+
+.mood label:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mood input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+/* ===== 12. WELCOME (LANDING) PAGE =====
+   Shown at "/" to people who are not logged in. Uses the same colour variables as the app,
+   so it follows light and dark mode too. */
+
+html {
+  scroll-behavior: smooth;
+}
+
+.land {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 16px 40px;
+}
+
+.land-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--ln);
+}
+
+a.land-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font:
+    12px "Press Start 2P",
+    monospace;
+  color: var(--at);
+  text-decoration: none;
+}
+
+.land-links {
+  display: flex;
+  gap: 18px;
+}
+
+.land-links a {
+  color: var(--tx);
+  text-decoration: none;
+}
+
+.land-links a:hover {
+  color: var(--at);
+}
+
+.land-cta {
+  display: flex;
+  gap: 8px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: center;
+  padding: 48px 0 32px;
+}
+
+.hero h1 {
+  font-size: 38px;
+  line-height: 1.15;
+  margin: 12px 0;
+}
+
+.hero-sub {
+  font-size: 17px;
+  color: var(--mu);
+  margin: 0 0 20px;
+}
+
+.hero-btns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.big-btn {
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+/* Static picture of the Task board (sample data) */
+.preview {
+  background: var(--sf);
+  border: 1px solid var(--ln);
+  border-radius: 20px;
+  padding: 12px;
+}
+
+.preview-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.preview-bar i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ln);
+}
+
+.preview-bar span {
+  margin-left: 8px;
+}
+
+.preview-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pcol {
+  border: 2px dashed var(--ln);
+  border-radius: 14px;
+  padding: 8px;
+}
+
+.pcol h3 {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 6px;
+  font-size: 12px;
+}
+
+.pcard {
+  display: grid;
+  gap: 2px;
+  background: var(--bg);
+  border: 1px solid var(--ln);
+  border-radius: 12px;
+  padding: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.pcard .mu {
+  font-size: 11px;
+}
+
+.pcard.done {
+  opacity: 0.6;
+}
+
+.preview-level {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--sf));
+}
+
+.land-sec {
+  padding: 48px 0 8px;
+  scroll-margin-top: 12px;
+}
+
+.land-sec h2 {
+  font-size: 28px;
+}
+
+.feat-grid,
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.feat,
+.step {
+  margin: 0;
+}
+
+.feat h3 {
+  margin: 0 0 6px;
+}
+
+.feat p,
+.step p {
+  margin: 0;
+}
+
+.num {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--ink);
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.step b {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.land-end {
+  margin-top: 48px;
+  padding: 36px 16px;
+  text-align: center;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 22%, var(--sf)), var(--sf));
+}
+
+.land-foot {
+  margin-top: 28px;
+  text-align: center;
+}
+
+@media (max-width: 800px) {
+.hero {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 28px;
+  }
+
+.hero h1 {
+    font-size: 30px;
+  }
+
+.land-links {
+    display: none;
+  }
+
+.feat-grid,
+  .steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+
+/* ===== 15. PASSWORD BOX WITH A SHOW / HIDE BUTTON (see static/js/password.js) ===== */
+
+/* a <span>, because a <label> may only hold inline elements; display: block makes it act like a box */
+.pw {
+  position: relative;
+  display: block;
+}
+
+.pw input {
+  padding-right: 64px !important;   /* room for the button inside the box */
+}
+
+.pw-toggle {
+  position: absolute;
+  right: 8px;
+  bottom: 7px;
+  background: none;
+  border: 0;
+  color: var(--at);
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.hint {
+  display: block;
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--mu);
+  margin-top: 3px;
+}
