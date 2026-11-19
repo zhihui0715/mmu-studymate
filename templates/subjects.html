@@ -1,0 +1,66 @@
+{# subjects.html - subject list, add, edit, delete, restore.   [OWNER: Tan Yu Zhe]
+   W4 adds "N of M tasks done" to each row. #}
+{% extends "base.html" %}
+{% block title %}Subjects{% endblock %}
+
+{# The add form and the edit form are the same fields, so they share this macro.
+   `s` holds the values to show: the saved subject, or what the student typed before an error. #}
+{% macro subject_fields(s) %}
+<div class="g4" style="text-align: left">
+  <label class="fl">Code<input name="code" maxlength="20" value="{{ s.code or '' }}" /></label>
+  <label class="fl">Name<input name="name" maxlength="80" value="{{ s.name or '' }}" /></label>
+  <label class="fl">Lecturer<input name="lecturer" maxlength="80" value="{{ s.lecturer or '' }}" /></label>
+  <label class="fl">Weight (0.1 to 3)<input name="weight" type="number" step=".1" min=".1" max="3" value="{{ s.weight or 1 }}" /></label>
+  <label class="fl">Colour<input name="color" type="color" value="{{ s.color or '#9BE15D' }}" /></label>
+</div>
+{% endmacro %}
+
+{% block content %}
+<h2>Subjects</h2>
+<p class="sub">Subject weight (default 1.0) makes important subjects count more in your workload.</p>
+<div>
+  {% for s in subjects %}
+  {% if editing == s.id %}
+  <!-- this subject is open for editing -->
+  <form class="card" method="post" action="{{ url_for('subjects.subject_save', subject_id=s.id) }}" novalidate>
+    <b>Edit {{ s.code }}</b>
+    {{ subject_fields(typed or s) }}
+    <div class="err" role="alert">{{ error }}</div>
+    <button class="btn">Save changes</button>
+    <a class="btn g" href="{{ url_for('subjects.subjects') }}">Cancel</a>
+  </form>
+  {% else %}
+  <div class="card row">
+    <div>
+      <span class="dot" style="background: {{ s.color }}"></span><b>{{ s.code }} {{ s.name }}</b>
+      <div class="mu">{{ s.lecturer }} · weight {{ s.weight }}</div>
+    </div>
+    <div>
+      <a class="btn g" style="padding: 2px 12px" href="{{ url_for('subjects.subjects', edit=s.id) }}">Edit</a>
+      <form method="post" action="{{ url_for('subjects.subject_delete', subject_id=s.id) }}" style="display: inline"
+            onsubmit="return confirm('Delete {{ s.code }} and all its tasks?')">
+        <button class="del" aria-label="Delete subject {{ s.code }} and its tasks" title="Deletes this subject and its tasks">✕</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+
+{% if missing %}
+<!-- MMU subjects you do not have: pick one to add it with the right code and name -->
+<form class="card row" method="post" action="{{ url_for('subjects.subject_add_mmu') }}">
+  <label class="fl" style="flex: 1">Add an MMU subject
+    <select name="code">{% for code, name in missing %}<option value="{{ code }}">{{ code }} {{ name }}</option>{% endfor %}</select>
+  </label>
+  <button class="btn">Add</button>
+</form>
+{% endif %}
+
+<form class="card" method="post" action="{{ url_for('subjects.subject_add') }}" novalidate>
+  <b>Add another subject</b>
+  {{ subject_fields(typed if not editing else {}) }}
+  {% if not editing %}<div class="err" role="alert">{{ error }}</div>{% endif %}
+  <button class="btn">Save subject</button>
+</form>
+{% endblock %}
