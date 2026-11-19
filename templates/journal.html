@@ -17,12 +17,12 @@
   <input type="hidden" name="date" value="{{ day }}" />
   <b>How satisfied are you with this day?</b>
   <div class="mood row" style="justify-content: flex-start; margin: 8px 0">
-    {% for mood in moods %}
-    <label style="--mood: {{ mood.colour }}"><input type="radio" name="mood" value="{{ mood.value }}"{% if entry.mood == mood.value %} checked{% endif %} /><span class="mood-face">{{ mood.emoji }}</span><span class="mood-name">{{ mood.label }}</span></label>
+    {% for face in mood_faces %}
+    <label aria-label="{{ moods[loop.index0] }}"><input type="radio" name="mood" value="{{ loop.index }}"{% if entry.mood == loop.index %} checked{% endif %} />{{ face }}</label>
     {% endfor %}
   </div>
-  <label class="fl">What went well?<textarea name="went_well" rows="2">{{ entry.went_well }}</textarea></label>
-  <label class="fl">What to improve tomorrow?<textarea name="improve" rows="2">{{ entry.improve }}</textarea></label>
+  <label class="fl">What went well<textarea name="went_well" rows="2">{{ entry.went_well }}</textarea></label>
+  <label class="fl">What to improve tomorrow<textarea name="improve" rows="2">{{ entry.improve }}</textarea></label>
   <label class="fl">Study hours (0 to 10)
     <input name="hours" type="number" min="0" max="10" step="0.5" value="{{ entry.hours if entry.hours is defined else 0 }}" />
   </label>
@@ -34,9 +34,8 @@
 <h2>Past days</h2>
 <div>
   {% for saved in past_days %}
-  {% set mood = mood_by_value[saved.mood] %}
   <a class="card row" style="width: 100%; text-align: left; text-decoration: none; color: inherit" href="{{ url_for('journal.journal', date=saved.day) }}">
-    <span><span class="mood-chip" style="--mood: {{ mood.colour }}">{{ mood.emoji }} {{ mood.label }}</span> <b>{{ saved.day }}</b> <span class="mu">{{ saved.went_well }}</span></span>
+    <span>{{ mood_faces[saved.mood - 1] }} <b>{{ saved.day }}</b> <span class="mu">{{ saved.went_well }}</span></span>
     <span class="mu">{{ '%g'|format(saved.hours) }} h</span>
   </a>
   {% else %}<div class="card mu">No summaries yet.</div>{% endfor %}
