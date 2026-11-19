@@ -1,40 +1,53 @@
-"""helpers.py - small tools that the route files share."""
-import re                                   # built-in: regular expressions (pattern matching)
+"""helpers.py - small tools the route files share.
+
+Shared file: each member edits ONLY their own marked section.
+"""
+import math                                 # built-in: isfinite()
+import re                                   # built-in: pattern matching
+from datetime import date                   # built-in: dates
 from functools import wraps                 # built-in: keeps a function's name when wrapping it
 
 from flask import g, redirect, request, url_for
-# g        = this request's storage (app.py puts the logged-in user in g.user)
-# redirect = sends the browser to another page
-# request  = the incoming request (form data, etc.)
-# url_for  = builds a URL from a route name, e.g. url_for('account.login') -> /login
 
 
-# ---------- login check ----------
+# ---------- [OWNER: Zhi Hui] login and form input ----------
 
 def login_required(view):
-    """Put @login_required above a route to make it members-only."""
-    @wraps(view)                            # keeps the original function name (Flask needs it)
-    def wrapped(*args, **kwargs):           # *args, **kwargs = pass along any arguments
+    """Put @login_required above a route to make it members-only (装饰器 decorator)."""
+    @wraps(view)
+    def wrapped(*args, **kwargs):
         if g.user is None:                  # nobody logged in
             return redirect(url_for('account.login'))
-        return view(*args, **kwargs)        # logged in: run the real page
+        return view(*args, **kwargs)
     return wrapped
-# This is a decorator (装饰器): a function that wraps another function to add a check before it.
 
-
-# ---------- reading and checking form input ----------
 
 def is_valid_email(email):
     """something@something.something, at most 254 characters."""
     return bool(re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email)) and len(email) <= 254
-    # [^\s@]+  = one or more characters that are not a space or @
-    # fullmatch = the WHOLE text must fit the pattern, not just part of it
-    # 254 = the longest email address the standard allows
+
+
+def parse_date(text):
+    """'2026-10-05' -> date(2026, 10, 5). None if it is not a real date."""
+    if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', text or ''):
+        return None
+    try:
+        return date.fromisoformat(text)
+    except ValueError:                      # e.g. 2026-02-31
+        return None
 
 
 def form_text(name, limit=500):
     """One text box from the form: spaces trimmed, cut to `limit` characters."""
     return (request.form.get(name) or '').strip()[:limit]
-    # .get(name) or ''  = empty text if the box is missing (avoids a crash on None)
-    # .strip()          = removes spaces at the start and end
-    # [:limit]          = cuts off anything too long, so nobody can save a huge text
+
+
+# ---------- [OWNER: Tan Yu Zhe] subject input ----------
+
+def parse_weight(text):
+    """Subject weight: above 0 and at most 3. None if not."""
+    try:
+        weight = float(text)
+    except (TypeError, ValueError):
+        return None
+    return weight if 0 < weight <= 3 and math.isfinite(weight) else None   # blocks 'nan' and 'inf'
