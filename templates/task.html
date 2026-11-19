@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StudyMate - Tasks</title>
+</head>
+<body>
+
+  <!-- ===== TOP BAR ===== -->
+  <header>
+    <h2>MMU StudyMate</h2>
+    <span>Semester 3 · 2026</span> |
+    <button type="button">Sound: on</button>
+    <button type="button">Theme: Auto</button>
+    <button type="button">Log out</button>
+  </header>
+  <hr>
+
+  <!-- ===== SIDEBAR NAVIGATION ===== -->
+  <nav>
+    <ul>
+      <li><a href="#">Dashboard</a></li>
+      <li><strong>Tasks</strong></li>
+      <li><a href="#">Planner</a></li>
+      <li><a href="calendar_plain.html">Calendar</a></li>
+      <li><a href="#">Journal</a></li>
+      <li><a href="#">Insights</a></li>
+      <li><a href="#">Friends</a></li>
+      <li><a href="subjects_plain.html">Subjects</a></li>
+      <li><a href="#">Rewards</a></li>
+      <li><a href="#">Profile</a></li>
+    </ul>
+  </nav>
+  <hr>
+
+  <!-- ===== MAIN ===== -->
+  <main>
+    <h1>Task board</h1>
+    <button type="button" id="addBtn">+ Add</button>
+    <p>Drag cards between columns, or use the arrow buttons. Pick a day to look back at past work.</p>
+
+    <!-- SEARCH AND FILTERS -->
+    <section>
+      <p>
+        <input type="search" id="fSearch" placeholder="Search name or description" size="50">
+      </p>
+      <p>
+        <select id="fSubject"></select>
+        <select id="fPriority">
+          <option value="">Any priority</option>
+          <option value="urgent">Urgent</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+        <select id="fType"></select>
+      </p>
+      <p>
+        <select id="fStatus">
+          <option value="">Any status</option>
+          <option value="todo">To do</option>
+          <option value="doing">In progress</option>
+          <option value="done">Completed</option>
+        </select>
+        <input type="date" id="fDate">
+        <select id="fSort">
+          <option value="due">Sort: due date</option>
+          <option value="priority">Sort: priority</option>
+          <option value="hours">Sort: study hours</option>
+          <option value="title">Sort: title</option>
+        </select>
+      </p>
+      <button type="button" id="applyBtn">Apply filters</button>
+      <a href="#" id="clearLink">Clear</a>
+    </section>
+    <hr>
+
+    <!-- KANBAN BOARD -->
+    <table border="1" cellpadding="8" width="100%" id="board">
+      <tr>
+        <td data-status="todo" valign="top" width="33%">
+          <h3>To do (<span id="count-todo">0</span>)</h3>
+          <div id="col-todo"></div>
+        </td>
+        <td data-status="doing" valign="top" width="33%">
+          <h3>In progress (<span id="count-doing">0</span>)</h3>
+          <div id="col-doing"></div>
+        </td>
+        <td data-status="done" valign="top" width="33%">
+          <h3>Completed (<span id="count-done">0</span>)</h3>
+          <div id="col-done"></div>
+        </td>
+      </tr>
+    </table>
+  </main>
+  <hr>
+
+  <!-- ===== ADD / EDIT FORM (a native pop-up) ===== -->
+  <dialog id="taskDialog">
+    <h2 id="dialogTitle">Add task</h2>
+    <form id="taskForm">
+      <p>
+        <label>Title:<br>
+          <input type="text" id="tTitle" required size="40">
+        </label>
+      </p>
+      <p>
+        <label>Description:<br>
+          <textarea id="tDesc" rows="3" cols="40"></textarea>
+        </label>
+      </p>
+      <p>
+        <label>Subject:
+          <select id="tSubject" required></select>
+        </label>
+      </p>
+      <p>
+        <label>Type:
+          <select id="tType"></select>
+        </label>
+      </p>
+      <p>
+        <label>Priority:
+          <select id="tPriority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </label>
+      </p>
+      <p>
+        <label>Deadline:
+          <input type="date" id="tDeadline" required>
+        </label>
+      </p>
+      <p>
+        <label>Study hours:
+          <input type="number" id="tHours" value="1" min="0" max="100" step="0.5">
+        </label>
+      </p>
+      <p>
+        <label>Status:
+          <select id="tStatus">
+            <option value="todo">To do</option>
+            <option value="doing">In progress</option>
+            <option value="done">Completed</option>
+          </select>
+        </label>
+      </p>
+      <button type="submit">Save</button>
+      <button type="button" id="cancelBtn">Cancel</button>
+    </form>
+  </dialog>
+
+  <!-- ===== RIGHT PANEL ===== -->
+  <aside>
+    <section>
+      <h3>Your Level</h3>
+      <h2>Level 1</h2>
+      <p>XP: 0 / 100</p>
+      <progress value="0" max="100"></progress>
+      <p>100 XP to level 2</p>
+      <p><strong>0 / 150</strong> XP today</p>
+      <p>🔥 <strong>0</strong> days streak</p>
+    </section>
+    <section>
+      <h3>Quick Actions</h3>
+      <ul>
+        <li><a href="#">Add or update a task</a></li>
+        <li><a href="#">Write today's journal</a></li>
+        <li><a href="#">Open the study planner</a></li>
+        <li><a href="#">See your badges</a></li>
+      </ul>
+    </section>
+  </aside>
+
+  <script>
+    // ---------- CONSTANTS ----------
+    var SUBJECT_KEY = "studymate_subjects";
+    var TASK_KEY = "studymate_tasks";
+
+    var CATALOG = {
+      CDS1114: "Introduction to Digital System",
+      CCT1114: "Introduction to Computing Tech",
+      CMF1114: "Multimedia Fundamentals",
+      CMT1114: "Mathematics I",
+      CMT1124: "Mathematics II",
+      CMT1134: "Mathematics III",
+      CPP1113: "Principles of Physics",
+      CSP1114: "Problem Solving & Prog Design",
+      CSP1123: "Mini IT Project",
+      GNB1114: "Intro to Business Management",
+      LAE1113: "Academic English",
+      LCE1113: "Communicative English",
+      LCT1113: "Critical Thinking",
+      LEE1113: "Essential English"
+    };
+
+    var TYPES = ["Assignment", "Quiz", "Test", "Exam", "Project", "Lab report", "Revision"];
+    var PRIORITY_ICON = { urgent: "🔴", high: "🟠", medium: "🟡", low: "🟢" };
+    var PRIORITY_RANK = { urgent: 0, high: 1, medium: 2, low: 3 };
+    var STATUSES = ["todo", "doing", "done"];
+    var STATUS_LABEL = { todo: "To do", doing: "In progress", done: "Completed" };
+
+    // ---------- SAVE AND LOAD ----------
+    function loadList(key) {
+      try {
+        return JSON.parse(localStorage.getItem(key)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveTasks() {
+      try {
+        localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
+      } catch (e) {
+        alert("Could not save. Browser storage is blocked.");
+      }
+    }
+
+    var tasks = loadList(TASK_KEY);
+    var editingId = null;
+
+    // ---------- HELPERS ----------
+    function escapeHtml(text) {
+      var div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function pad(n) { return n < 10 ? "0" + n : "" + n; }
+
+    function activeSubjectCodes() {
+      return loadList(SUBJECT_KEY)
+        .filter(function (s) { return !s.deleted; })
+        .map(function (s) { return s.code; });
+    }
+
+    function subjectLabel(code) {
+      return code + (CATALOG[code] ? " - " + CATALOG[code] : "");
+    }
+
+    function nextId() {
+      var max = 0;
+      tasks.forEach(function (t) { if (t.id > max) max = t.id; });
+      return max + 1;
+    }
+
+    // days from today until the deadline (negative = already late)
+    function daysUntil(dateString) {
+      var p = dateString.split("-");
+      var due = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+      var now = new Date();
+      var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      return Math.round((due - today) / 86400000);
+    }
+
+    function deadlineLabel(t) {
+      if (t.status === "done") return "✅ Completed";
+      if (!t.deadline) return "No deadline";
+      var d = daysUntil(t.deadline);
+      if (d < 0) return "⚠️ OVERDUE by " + (-d) + (d === -1 ? " day" : " days");
+      if (d === 0) return "⏰ DUE TODAY";
+      if (d === 1) return "Due tomorrow";
+      return "Due in " + d + " days";
+    }
+
+    // ---------- FILL THE DROPDOWNS ----------
+    function fillFilterDropdowns() {
+      var subjectHtml = "<option value=''>All subjects</option>";
+      activeSubjectCodes().forEach(function (code) {
+        subjectHtml += "<option value='" + code + "'>" + code + "</option>";
+      });
+      document.getElementById("fSubject").innerHTML = subjectHtml;
+
+      var typeHtml = "<option value=''>Any type</option>";
+      TYPES.forEach(function (ty) {
+        typeHtml += "<option value='" + ty + "'>" + ty + "</option>";
+      });
+      document.getElementById("fType").innerHTML = typeHtml;
+
+      var formTypeHtml = "";
+      TYPES.forEach(function (ty) {
+        formTypeHtml += "<option value='" + ty + "'>" + ty + "</option>";
+      });
+      document.getElementById("tType").innerHTML = formTypeHtml;
+    }
+
+    function fillFormSubjects(extraCode) {
+      var codes = activeSubjectCodes();
+      // keep the old subject visible when editing a task whose subject was deleted
+      if (extraCode && codes.indexOf(extraCode) === -1) codes.push(extraCode);
+
+      var html = "";
+      codes.forEach(function (code) {
+        html += "<option value='" + code + "'>" + escapeHtml(subjectLabel(code)) + "</option>";
+      });
+      document.getElementById("tSubject").innerHTML = html;
+    }
+
+    // ---------- FILTER AND SORT ----------
+    function getVisibleTasks() {
+      var q        = document.getElementById("fSearch").value.trim().toLowerCase();
+      var subject  = document.getElementById("fSubject").value;
+      var priority = document.getElementById("fPriority").value;
+      var type     = document.getElementById("fType").value;
+      var status   = document.getElementById("fStatus").value;
+      var date     = document.getElementById("fDate").value;
+      var sort     = document.getElementById("fSort").value;
+
+      var list = tasks.filter(function (t) {
+        var text = (t.title + " " + (t.description || "")).toLowerCase();
+        if (q && text.indexOf(q) === -1) return false;
+        if (subject && t.subject !== subject) return false;
+        if (priority && t.priority !== priority) return false;
+        if (type && t.type !== type) return false;
+        if (status && t.status !== status) return false;
+        if (date && t.deadline !== date) return false;
+        return true;
+      });
+
+      list.sort(function (a, b) {
+        if (sort === "priority") return PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority];
+        if (sort === "hours") return b.hours - a.hours;
+        if (sort === "title") return a.title.localeCompare(b.title);
+        // due date: earliest first, tasks without a deadline last
+        var da = a.deadline || "9999-99-99";
+        var db = b.deadline || "9999-99-99";
+        return da < db ? -1 : (da > db ? 1 : 0);
+      });
+      return list;
+    }
+
+    // ---------- DRAW THE BOARD ----------
+    function renderBoard() {
+      var visible = getVisibleTasks();
+
+      STATUSES.forEach(function (status) {
+        var inColumn = visible.filter(function (t) { return t.status === status; });
+        var html = "";
+
+        inColumn.forEach(function (t) {
+          var pos = STATUSES.indexOf(t.status);
+          html += "<fieldset draggable='true' data-id='" + t.id + "'>" +
+            "<legend>" + PRIORITY_ICON[t.priority] + " <strong>" + escapeHtml(t.title) + "</strong></legend>" +
+            (t.description ? "<p>" + escapeHtml(t.description) + "</p>" : "") +
+            "<p>Subject: " + escapeHtml(t.subject) + "<br>" +
+            "Type: " + escapeHtml(t.type) + "<br>" +
+            "Priority: " + t.priority + "<br>" +
+            "Deadline: " + escapeHtml(t.deadline || "-") + "<br>" +
+            "<strong>" + deadlineLabel(t) + "</strong><br>" +
+            "Study hours: " + Number(t.hours) + " h</p>" +
+            (pos > 0 ? "<button type='button' onclick='moveTask(" + t.id + ", -1)'>←</button> " : "") +
+            (pos < 2 ? "<button type='button' onclick='moveTask(" + t.id + ", 1)'>→</button> " : "") +
+            "<button type='button' onclick='openEdit(" + t.id + ")'>Edit</button> " +
+            "<button type='button' onclick='deleteTask(" + t.id + ")'>Delete</button>" +
+            "</fieldset>";
+        });
+
+        if (inColumn.length === 0) html = "<p>Drop cards here</p>";
+        document.getElementById("col-" + status).innerHTML = html;
+        document.getElementById("count-" + status).textContent = inColumn.length;
+      });
+    }
+
+    // ---------- MOVE (arrows and drag and drop share this) ----------
+    function setStatus(id, status) {
+      var t = tasks.find(function (x) { return x.id === id; });
+      if (!t || t.status === status) return;
+      t.status = status;
+      saveTasks();      // without this the card jumps back after a refresh
+      renderBoard();
+    }
+
+    function moveTask(id, direction) {
+      var t = tasks.find(function (x) { return x.id === id; });
+      if (!t) return;
+      var newPos = STATUSES.indexOf(t.status) + direction;
+      if (newPos < 0 || newPos > 2) return;
+      setStatus(id, STATUSES[newPos]);
+    }
+
+    var board = document.getElementById("board");
+
+    board.addEventListener("dragstart", function (event) {
+      var card = event.target.closest("fieldset[data-id]");
+      if (!card) return;
+      event.dataTransfer.setData("text/plain", card.getAttribute("data-id"));
+      event.dataTransfer.effectAllowed = "move";
+    });
+
+    board.addEventListener("dragover", function (event) {
+      if (event.target.closest("td[data-status]")) {
+        event.preventDefault();      // this is what allows a drop
+      }
+    });
+
+    board.addEventListener("drop", function (event) {
+      var column = event.target.closest("td[data-status]");
+      if (!column) return;
+      event.preventDefault();
+      var id = Number(event.dataTransfer.getData("text/plain"));
+      setStatus(id, column.getAttribute("data-status"));
+    });
+
+    // ---------- ADD / EDIT / DELETE ----------
+    var dialog = document.getElementById("taskDialog");
+
+    document.getElementById("addBtn").addEventListener("click", function () {
+      if (activeSubjectCodes().length === 0) {
+        alert("Add a subject on the Subjects page first.");
+        return;
+      }
+      editingId = null;
+      document.getElementById("taskForm").reset();
+      fillFormSubjects(null);
+      document.getElementById("dialogTitle").textContent = "Add task";
+      dialog.showModal();
+    });
+
+    function openEdit(id) {
+      var t = tasks.find(function (x) { return x.id === id; });
+      if (!t) return;
+      editingId = id;
+
+      fillFormSubjects(t.subject);
+      document.getElementById("tTitle").value = t.title;
+      document.getElementById("tDesc").value = t.description || "";
+      document.getElementById("tSubject").value = t.subject;
+      document.getElementById("tType").value = t.type;
+      document.getElementById("tPriority").value = t.priority;
+      document.getElementById("tDeadline").value = t.deadline;
+      document.getElementById("tHours").value = t.hours;
+      document.getElementById("tStatus").value = t.status;
+
+      document.getElementById("dialogTitle").textContent = "Edit task";
+      dialog.showModal();
+    }
+
+    document.getElementById("cancelBtn").addEventListener("click", function () {
+      dialog.close();
+    });
+
+    document.getElementById("taskForm").addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      var hours = parseFloat(document.getElementById("tHours").value);
+      if (isNaN(hours) || hours < 0) {
+        alert("Study hours must be 0 or more.");
+        return;
+      }
+
+      var data = {
+        title: document.getElementById("tTitle").value.trim(),
+        description: document.getElementById("tDesc").value.trim(),
+        subject: document.getElementById("tSubject").value,
+        type: document.getElementById("tType").value,
+        priority: document.getElementById("tPriority").value,
+        deadline: document.getElementById("tDeadline").value,
+        hours: hours,
+        status: document.getElementById("tStatus").value
+      };
+
+      if (data.title === "") {
+        alert("Please enter a title.");
+        return;
+      }
+
+      if (editingId === null) {
+        data.id = nextId();
+        tasks.push(data);
+      } else {
+        tasks.forEach(function (t) {
+          if (t.id === editingId) {
+            t.title = data.title;
+            t.description = data.description;
+            t.subject = data.subject;
+            t.type = data.type;
+            t.priority = data.priority;
+            t.deadline = data.deadline;
+            t.hours = data.hours;
+            t.status = data.status;
+          }
+        });
+      }
+
+      saveTasks();
+      dialog.close();
+      renderBoard();
+    });
+
+    function deleteTask(id) {
+      var t = tasks.find(function (x) { return x.id === id; });
+      if (!t) return;
+      if (!confirm("Delete task \"" + t.title + "\"?")) return;
+      tasks = tasks.filter(function (x) { return x.id !== id; });
+      saveTasks();
+      renderBoard();
+    }
+
+    // ---------- FILTER BUTTONS ----------
+    document.getElementById("applyBtn").addEventListener("click", renderBoard);
+
+    document.getElementById("fSearch").addEventListener("keydown", function (event) {
+      if (event.key === "Enter") renderBoard();
+    });
+
+    document.getElementById("clearLink").addEventListener("click", function (event) {
+      event.preventDefault();
+      document.getElementById("fSearch").value = "";
+      document.getElementById("fSubject").value = "";
+      document.getElementById("fPriority").value = "";
+      document.getElementById("fType").value = "";
+      document.getElementById("fStatus").value = "";
+      document.getElementById("fDate").value = "";
+      document.getElementById("fSort").value = "due";
+      renderBoard();
+    });
+
+    // ---------- START ----------
+    fillFilterDropdowns();
+    renderBoard();
+  </script>
+</body>
+</html>
