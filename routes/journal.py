@@ -13,7 +13,7 @@ from data import MOOD_BY_VALUE, MOODS  # Stores mood options and their informati
 from helpers import form_text, login_required, parse_date  # Reusable helper functions.
 
 # Creates a Blueprint to organize journal routes.
-bp = Blueprint('journal', __name__)
+bp = Blueprint('journal', __name__)    
 
 
 # Displays the journal page with the selected day's information.

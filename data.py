@@ -3,10 +3,15 @@
 Shared file: each member edits ONLY their own marked section.
 """
 
-# ---------- [OWNER: Kong Fu Sheng] journal moods ----------
-MOODS = ['Rough', 'Meh', 'Okay', 'Good', 'Great']           # mood 1 to 5
-MOOD_FACES = ['😞', '😕', '🙂', '😄', '🤩']
-
+## ---------- [OWNER: Kong Fu Sheng] journal moods ----------
+MOODS = [                                                     # mood 1 to 5
+    {'value': 1, 'label': 'Rough', 'emoji': '😞', 'colour': '#E5484D'},
+    {'value': 2, 'label': 'Meh',   'emoji': '😕', 'colour': '#F28C28'},
+    {'value': 3, 'label': 'Okay',  'emoji': '🙂', 'colour': '#F5C542'},
+    {'value': 4, 'label': 'Good',  'emoji': '😄', 'colour': '#7BC86C'},
+    {'value': 5, 'label': 'Great', 'emoji': '🤩', 'colour': '#00C389'},
+]
+MOOD_BY_VALUE = {mood['value']: mood for mood in MOODS}      # 3 → the 'Okay' dict
 
 # ---------- [OWNER: Tan Yu Zhe] MMU subjects ----------
 # (code, name, lecturer, weight, colour). The Mini IT Project counts a bit more.
