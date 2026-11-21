@@ -77,6 +77,6 @@ def signup():
 
 
 @bp.post('/logout')                               # POST only: a link can't log you out
-def logout():
+def logout():                                    
     session.clear()
     return redirect(url_for('account.home'))

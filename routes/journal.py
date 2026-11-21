@@ -49,7 +49,7 @@ def journal_save():
     if not (0 <= hours <= 10 and math.isfinite(hours)):
         return render_journal(day, entry, 'Study hours must be between 0 and 10.')
 
-    is_new = not database.has_journal_entry(g.user['id'], day)
+    is_new = not database.has_journal_entry(g.user['id'], day) # True if this is the first entry for that day
     database.save_journal_entry(g.user['id'], day, entry['mood'], entry['went_well'], entry['improve'], hours)
     flash('Summary saved' if is_new else 'Summary updated')
     return redirect(url_for('journal.journal', date=day))
