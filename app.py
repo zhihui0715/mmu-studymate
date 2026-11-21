@@ -48,7 +48,7 @@ NAV_TABS = [
 def load_user():
     g.today = date.today()
     g.user = None                           # default: nobody logged in
-    user_id = session.get('uid')            # the id saved at login, or None
+    user_id = session.get('uid')            
     if user_id:
         user = database.get_user(user_id)
         if user is None:                    # account was deleted: forget the old login
@@ -57,7 +57,7 @@ def load_user():
             g.user = user
 
 
-@app.context_processor                      # values every template can use
+@app.context_processor                      # return ditcs to every template (HTML page)
 def inject_globals():
     return {'user': g.get('user'), 'nav_tabs': NAV_TABS}
 

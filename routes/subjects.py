@@ -3,7 +3,7 @@
 Pages:  /subjects               the list + Add form   (?edit=<id> opens one for editing)
         /subjects/add           POST: save a new subject
         /subjects/add-mmu       POST: restore one subject from the MMU list
-        /subjects/<id>/save     POST: save the edited subject
+        /subjects/<id>/save     POST: save the edited subject 
         /subjects/<id>/delete   POST: delete (its tasks go too)
 W4 adds the "N of M tasks done" count once tasks exist.
 """
@@ -17,14 +17,13 @@ from helpers import form_text, login_required, parse_weight
 
 bp = Blueprint('subjects', __name__)
 
-
 def render_subjects(error='', editing=None, typed=None):
     """Draws the page. `typed` keeps what the user typed after an error."""
-    rows = database.list_subjects(g.user['id'])
+    rows = database.list_subjects(g.user['id']) # set compreshion below: codes you already
     have = {s['code'] for s in rows}
     missing = [(code, name) for code, name, _, _, _ in MMU_SUBJECTS if code not in have]   # for the restore list
     return render_template('subjects.html', subjects=rows, error=error, editing=editing,
-                           typed=typed or {}, missing=missing)
+                           typed=typed or {}, missing=missing) 
 
 
 def read_subject_form():
@@ -35,6 +34,7 @@ def read_subject_form():
         'weight': request.form.get('weight', ''), 'color': request.form.get('color', ''),
     }
     weight = parse_weight(fields['weight'])
+
     if not fields['code'] or not fields['name']:
         return fields, 'Enter a subject code and name.'
     if weight is None:
@@ -42,13 +42,13 @@ def read_subject_form():
     if not re.fullmatch(r'#[0-9a-fA-F]{6}', fields['color']):     # e.g. #9BE15D
         return fields, 'Choose a valid colour.'
     fields['weight'] = weight
-    return fields, ''
+    return fields, '' # no error
 
 
 @bp.route('/subjects')
 @login_required
 def subjects():
-    edit_text = request.args.get('edit', '')
+    edit_text = request.args.get('edit', '') # url query string: /subjects?edit=3
     editing = int(edit_text) if edit_text.isdigit() else None
     if editing and not database.get_subject(g.user['id'], editing):
         editing = None                           # not your subject: just show the list
@@ -83,7 +83,7 @@ def subject_add_mmu():
     return redirect(url_for('subjects.subjects'))
 
 
-@bp.post('/subjects/<int:subject_id>/save')
+@bp.post('/subjects/<int:subject_id>/save') # Dynamic URL Parameter
 @login_required
 def subject_save(subject_id):
     database.get_subject(g.user['id'], subject_id) or abort(404)   # 404 if not your subject

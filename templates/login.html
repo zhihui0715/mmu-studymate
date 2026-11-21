@@ -7,7 +7,7 @@
     <div class="stage"><img class="mascot" src="{{ url_for('static', filename='img/mascot.png') }}" width="150" height="135" alt="StudyMate mascot" /></div>
     <h1><img class="mmu-logo big" src="{{ url_for('static', filename='img/mmu-logo.png') }}" alt="MMU" /> StudyMate</h1>
     <p class="sub">Plan your subjects, beat your deadlines, build your streak.</p>
-    <form method="post" novalidate>
+    <form method="post" novalidate> 
       <label class="fl">Email<input name="email" type="email" value="{{ email }}" placeholder="name@student.mmu.edu.my" autocomplete="email" /></label>
       {# class="pw" adds the Show / Hide button (static/js/password.js) #}
       <label class="fl">Password<span class="pw"><input name="password" type="password" placeholder="Your password" autocomplete="current-password" /></span></label>

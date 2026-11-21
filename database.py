@@ -71,7 +71,7 @@ def get_db():
     if 'db' not in g:
         g.db = sqlite3.connect(current_app.config['DATABASE'])
         g.db.row_factory = sqlite3.Row                     # rows act like dicts: row['email']
-        g.db.execute('PRAGMA foreign_keys = ON')           # needed for ON DELETE CASCADE
+        g.db.execute('PRAGMA foreign_keys = ON')           # needed for ON DELETE CASCADE and foreign key checks
     return g.db
 
 
@@ -87,27 +87,27 @@ def init_db():
 
 def init_app(app):
     """Called once from app.py: makes instance/, the tables, and `flask init-db`."""
-    Path(app.config['DATABASE']).parent.mkdir(parents=True, exist_ok=True)
-    app.teardown_appcontext(close_db)
+    Path(app.config['DATABASE']).parent.mkdir(parents=True, exist_ok=True) # instance/ folder
+    app.teardown_appcontext(close_db) 
 
     with app.app_context():
         init_db()
 
-    @app.cli.command('init-db')
+    @app.cli.command('init-db') # terminal: flask init-db
     def init_db_command():
         init_db()
         click.echo('Database ready.')
 
 
-def _one(sql, params=()):
+def _one(sql, params=()): # params = tuple of values for the ? placeholders
     """First row as a dict, or None."""
     row = get_db().execute(sql, params).fetchone()
-    return dict(row) if row else None
+    return dict(row) if row else None # conditional expression: dict(row) if row else None
 
 
 def _all(sql, params=()):
     """Every row as a list of dicts."""
-    return [dict(row) for row in get_db().execute(sql, params).fetchall()]
+    return [dict(row) for row in get_db().execute(sql, params).fetchall()] # list comprehension
 
 
 # ---------- [OWNER: Zhi Hui] users ----------
@@ -118,8 +118,7 @@ def create_user(name, email, password_hash):
     cursor = db.execute(
         'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)', (name, email, password_hash)
     )
-    user_id = cursor.lastrowid
-    # [OWNER: Tan Yu Zhe] every new account starts with the 14 MMU subjects
+    user_id = cursor.lastrowid # the new user's id, used to add the default subjects
     db.executemany(
         'INSERT INTO subjects (user_id, code, name, lecturer, weight, color) VALUES (?, ?, ?, ?, ?, ?)',
         [(user_id, *subject) for subject in DEFAULT_SUBJECTS],
@@ -139,7 +138,7 @@ def get_user_by_email(email):
 # ---------- [OWNER: Tan Yu Zhe] subjects ----------
 
 def list_subjects(user_id):
-    return _all('SELECT * FROM subjects WHERE user_id = ? ORDER BY id', (user_id,))
+    return _all('SELECT * FROM subjects WHERE user_id = ? ORDER BY id', (user_id,)) #_all() returns a list of dicts, each dict = one row
 
 
 def get_subject(user_id, subject_id):
@@ -192,7 +191,7 @@ def save_journal_entry(user_id, day, mood, went_well, improve, hours):
     db.execute(
         'INSERT INTO journal (user_id, day, mood, went_well, improve, hours) VALUES (?, ?, ?, ?, ?, ?) '
         'ON CONFLICT(user_id, day) DO UPDATE SET mood = excluded.mood, went_well = excluded.went_well, '
-        'improve = excluded.improve, hours = excluded.hours',
+        'improve = excluded.improve, hours = excluded.hours', # upsert: add or update if already exists
         (user_id, day, mood, went_well, improve, hours),
     )
     db.commit()

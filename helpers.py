@@ -13,12 +13,12 @@ from flask import g, redirect, request, url_for
 # ---------- [OWNER: Zhi Hui] login and form input ----------
 
 def login_required(view):
-    """Put @login_required above a route to make it members-only (装饰器 decorator)."""
+    """Put @login_required above a route to make it members-only"""
     @wraps(view)
-    def wrapped(*args, **kwargs):
+    def wrapped(*args, **kwargs): # nested function: runs the original view if logged in
         if g.user is None:                  # nobody logged in
             return redirect(url_for('account.login'))
-        return view(*args, **kwargs)
+        return view(*args, **kwargs) # run the original view
     return wrapped
 
 
@@ -32,7 +32,7 @@ def parse_date(text):
     if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', text or ''):
         return None
     try:
-        return date.fromisoformat(text)
+        return date.fromisoformat(text)     # from YYYY-MM-DD string to date object
     except ValueError:                      # e.g. 2026-02-31
         return None
 

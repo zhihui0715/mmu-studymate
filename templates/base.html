@@ -25,7 +25,7 @@
 
       <div class="shell">
         {# left menu: NAV_TABS in app.py #}
-        <nav class="tabs" aria-label="Main menu">
+        <nav class="tabs" aria-label="Main menu"> "arial-label" is for screen readers, not visual users
           {% for endpoint, label in nav_tabs %}
           <a class="tab" href="{{ url_for(endpoint) }}"{% if request.endpoint == endpoint %} aria-current="true"{% endif %}><span>{{ label }}</span></a>
           {% endfor %}
