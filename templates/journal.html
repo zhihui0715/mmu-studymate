@@ -12,7 +12,7 @@
 </form>
 
 {# the entry form #}
-<form class="card" method="post" action="{{ url_for('study.journal_save') }}" novalidate>
+<form class="card" method="post" action="{{ url_for('journal.journal_save') }}" novalidate>
   <input type="hidden" name="date" value="{{ day }}" />
   <b>How satisfied are you with this day?</b>
   <div class="mood row" style="justify-content: flex-start; margin: 8px 0">
@@ -33,7 +33,7 @@
 <h2>Past days</h2>
 <div>
   {% for saved in past_days %}
-  <a class="card row" style="width: 100%; text-align: left; text-decoration: none; color: inherit" href="{{ url_for('study.journal', date=saved.day) }}">
+  <a class="card row" style="width: 100%; text-align: left; text-decoration: none; color: inherit" href="{{ url_for('journal.journal', date=saved.day) }}">
     <span>{{ mood_faces[saved.mood - 1] }} <b>{{ saved.day }}</b> <span class="mu">{{ saved.went_well }}</span></span>
     <span class="mu">{{ '%g'|format(saved.hours) }} h</span>
   </a>
