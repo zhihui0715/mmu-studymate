@@ -38,9 +38,13 @@ for blueprint in ALL_BLUEPRINTS:
 
 # Left menu: (page name, label). Add a line only when the page exists.
 NAV_TABS = [
+    ('dashboard.dashboard', 'Dashboard'),   # Kong (W3)
+    ('tasks.tasks', 'Tasks'),               # Tan (W3)
     ('subjects.subjects', 'Subjects'),      # Tan
-    ('journal.journal', 'Journal'),         # Kong     ← was 'study.journal'
+    ('journal.journal', 'Journal'),         # Kong
+    ('account.profile', 'Profile'),         # Zhi Hui (W3)
 ]
+
 
 # ---------- 4. before every request ----------
 
