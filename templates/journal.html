@@ -36,7 +36,7 @@
   {% for saved in past_days %}
   <a class="card row" style="width: 100%; text-align: left; text-decoration: none; color: inherit" href="{{ url_for('journal.journal', date=saved.day) }}">
     <span>{{ mood_faces[saved.mood - 1] }} <b>{{ saved.day }}</b> <span class="mu">{{ saved.went_well }}</span></span>
-    <span class="mu">{{ '%g'|format(saved.hours) }} h</span>
+    <span class="mu">{{ '%g'|format(saved.hours) }} h</span> {#Format Specifier#}
   </a>
   {% else %}<div class="card mu">No summaries yet.</div>{% endfor %}
 </div>

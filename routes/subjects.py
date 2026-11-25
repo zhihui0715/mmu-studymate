@@ -48,7 +48,7 @@ def read_subject_form():
 @bp.route('/subjects')
 @login_required
 def subjects():
-    edit_text = request.args.get('edit', '') # url query string: /subjects?edit=3
+    edit_text = request.args.get('edit', '') # URL Query Parameters : /subjects?edit=3
     editing = int(edit_text) if edit_text.isdigit() else None
     if editing and not database.get_subject(g.user['id'], editing):
         editing = None                           # not your subject: just show the list
