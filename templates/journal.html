@@ -6,9 +6,11 @@
 <h2>Daily summary</h2>
 <p class="sub">Look back on your day. You can open and edit any past day.</p>
 
-{# pick a day #}
-<form method="get" action="{{ url_for('journal.journal') }}" class="row" style="justify-content: flex-start; align-items: flex-end">
-  <label class="fl" style="max-width: 220px">Day<input type="date" name="date" value="{{ day }}" max="{{ today }}" onchange="this.form.submit()" /></label>
+{# pick a day: the page opens that day as soon as a date is chosen (no button) #}
+<form method="get" action="{{ url_for('journal.journal') }}">
+  <label class="fl" style="max-width: 220px">Day
+    <input type="date" name="date" value="{{ day }}" max="{{ today }}" onchange="this.form.submit()" />
+  </label>
 </form>
 
 {# the entry form #}
