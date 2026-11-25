@@ -1,6 +1,6 @@
 # =========================
 # Python Bytecode & Cache
-pycache/
+pycache/ # an automatically generated folder in Python that stores compiled bytecode files (.pyc) to speed up module loading
 *.pyc
 
 # =========================
@@ -15,3 +15,4 @@ instance/
 # =========================
 # Environment Variables (Secrets & API Keys)
 .env
+

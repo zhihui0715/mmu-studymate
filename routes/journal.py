@@ -34,7 +34,7 @@ def journal_save():
     chosen = parse_date(request.form.get('date'))
     if chosen is None or chosen > g.today:
         abort(400)
-    day = chosen.isoformat()
+    day = chosen.isoformat() # covert to string for database and template
 
     mood_text = request.form.get('mood', '')
     try:
@@ -53,3 +53,4 @@ def journal_save():
     database.save_journal_entry(g.user['id'], day, entry['mood'], entry['went_well'], entry['improve'], hours)
     flash('Summary saved' if is_new else 'Summary updated')
     return redirect(url_for('journal.journal', date=day))
+
