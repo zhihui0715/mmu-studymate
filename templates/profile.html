@@ -1,0 +1,30 @@
+{# profile.html - edit profile and change password.              [OWNER: Zhi Hui]
+   W3 version. W4 adds the Trimester card (week 1 date, "Week N of 14") between the two forms. #}
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<h2>Profile</h2>
+<p class="sub">Keep your details up to date.</p>
+
+<form class="card" method="post" action="{{ url_for('account.profile_save') }}" novalidate>
+  <label class="fl">Full name<input name="name" maxlength="60" value="{{ values.name }}" /></label>
+  <label class="fl">Email<input name="email" type="email" maxlength="254" value="{{ values.email }}" /></label>
+  <label class="fl">Course<input name="course" maxlength="120" value="{{ values.course }}" /></label>
+  <label class="fl">Semester
+    <select name="semester">
+      {% for s in semesters %}<option{% if s == values.semester %} selected{% endif %}>{{ s }}</option>{% endfor %}
+    </select>
+  </label>
+  <div class="err" role="alert">{{ profile_error }}</div>
+  <button class="btn wide">Save profile</button>
+</form>
+
+<form class="card" method="post" action="{{ url_for('account.password_save') }}" novalidate>
+  <b>Change password</b>
+  <label class="fl">Current password<span class="pw"><input name="current" type="password" autocomplete="current-password" /></span></label>
+  <label class="fl">New password<span class="pw"><input name="new" type="password" placeholder="At least 8 characters" autocomplete="new-password" /></span></label>
+  <label class="fl">Confirm new password<span class="pw"><input name="new2" type="password" placeholder="Type it again" autocomplete="new-password" /></span></label>
+  <div class="err" role="alert">{{ password_error }}</div>
+  <button class="btn wide">Update password</button>
+</form>
+{% endblock %}
