@@ -28,3 +28,13 @@ MMU_SUBJECTS = [
 ]
 
 DEFAULT_SUBJECTS = MMU_SUBJECTS     # every new account starts with all 14
+
+DEFAULT_SUBJECTS = MMU_SUBJECTS     # every new account starts with all 14
+
+# W3: the only values the task form accepts
+TASK_TYPES = ['Assignment', 'Quiz', 'Test', 'Exam', 'Presentation', 'Project', 'Study task']
+PRIORITIES = ['Low', 'Medium', 'High', 'Critical']
+
+# Kanban columns in order (the tasks.status values) and the names shown. Used by the board from W4.
+COLUMNS = ['todo', 'prog', 'done']
+COLUMN_NAMES = {'todo': 'To do', 'prog': 'In progress', 'done': 'Completed'}

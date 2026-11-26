@@ -1,3 +1,4 @@
+/* [OWNER: Tan Yu Zhe] */
 /* ======================================================================
    MMU StudyMate - style.css (every page uses this one file)
    WEEK 2 VERSION: only the styles the W2 pages use (welcome, log in, sign up, subjects, journal).
@@ -839,4 +840,41 @@ a.land-logo {
   font-size: 12px;
   color: var(--mu);
   margin-top: 3px;
+}
+
+/* ===== [OWNER: Tan Yu Zhe] W3: dashboard counters and task list ===== */
+.n {
+  font: 800 26px Nunito;
+  letter-spacing: -0.01em;
+  color: var(--at);
+}
+
+.n.w {
+  color: var(--dg);                 /* "Needs attention" number in the warning colour */
+}
+
+/* one task as a row: name on the left, priority and buttons on the right */
+.task {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.t {
+  flex: 1;
+  font-weight: 700;
+}
+
+.ds {
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--mu);
+  margin-top: 3px;
+  white-space: pre-line;            /* keeps the line breaks the student typed */
+}
+
+.pri {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--mu);
 }
