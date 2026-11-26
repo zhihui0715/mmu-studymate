@@ -1,2 +1,23 @@
 {# dashboard.html - greeting and the four counters.             [OWNER: Kong Fu Sheng]
    W3 page shell + study hours card. W4 adds today's top 3, W5 the trimester week bar, W6 the workload bar. #}
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h2>{{ greeting }}, {{ user.name }}</h2>
+<p class="sub">One task at a time is enough.</p>
+
+<div class="g4">
+  <div class="card"><div class="n">{{ stats.today }}</div><div class="mu">Due today</div></div>
+  <div class="card"><div class="n">{{ stats.week }}</div><div class="mu">Next 7 days</div></div>
+  <div class="card"><div class="n w">{{ stats.overdue }}</div><div class="mu">Needs attention</div></div>
+  <div class="card"><div class="n">{{ stats.done }}</div><div class="mu">Completed</div></div>
+</div>
+
+{# study hours: journal hours (last 7 days) against task estimated hours (next 7 days) #}
+<div class="card">
+  <b>Study hours</b>
+  <p>Studied <b>{{ '%g'|format(hours.studied) }} h</b> in the last 7 days.
+     Tasks due in the next 7 days need <b>{{ '%g'|format(hours.needed) }} h</b>.</p>
+  {% if hours.studied < hours.needed %}<p class="mu">You are behind. Plan some study time today.</p>{% endif %}
+</div>
+{% endblock %}
