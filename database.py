@@ -261,7 +261,7 @@ def save_journal_entry(user_id, day, mood, went_well, improve, hours):
     db.execute(
         'INSERT INTO journal (user_id, day, mood, went_well, improve, hours) VALUES (?, ?, ?, ?, ?, ?) '
         'ON CONFLICT(user_id, day) DO UPDATE SET mood = excluded.mood, went_well = excluded.went_well, '
-        'improve = excluded.improve, hours = excluded.hours',
+        'improve = excluded.improve, hours = excluded.hours', # upsert: add or update if already exists
         (user_id, day, mood, went_well, improve, hours),
     )
     db.commit()
