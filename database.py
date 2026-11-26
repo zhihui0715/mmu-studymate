@@ -134,6 +134,20 @@ def get_user(user_id):
 def get_user_by_email(email):
     return _one('SELECT * FROM users WHERE email = ?', (email,))
 
+def update_profile(user_id, name, email, course, semester):     # W3
+    db = get_db()
+    db.execute(
+        'UPDATE users SET name = ?, email = ?, course = ?, semester = ? WHERE id = ?',
+        (name, email, course, semester, user_id),
+    )
+    db.commit()
+
+
+def set_password_hash(user_id, password_hash):                  # W3: only the hash is ever saved
+    db = get_db()
+    db.execute('UPDATE users SET password_hash = ? WHERE id = ?', (password_hash, user_id))
+    db.commit()
+
 
 # ---------- [OWNER: Tan Yu Zhe] tasks W3 ----------
 
