@@ -247,6 +247,14 @@ def has_journal_entry(user_id, day):
     return get_journal_entry(user_id, day) is not None
 
 
+def journal_hours_between(user_id, start, end):
+    """Total study hours logged in the journal from start to end (both days included).
+    COALESCE gives 0 instead of nothing when there are no entries yet."""
+    row = _one('SELECT COALESCE(SUM(hours), 0) AS total FROM journal '
+               'WHERE user_id = ? AND day BETWEEN ? AND ?', (user_id, start, end))
+    return row['total']
+
+
 def save_journal_entry(user_id, day, mood, went_well, improve, hours):
     """Adds the day's entry, or UPDATES it if that day already has one (ON CONFLICT)."""
     db = get_db()
