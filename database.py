@@ -135,6 +135,54 @@ def get_user_by_email(email):
     return _one('SELECT * FROM users WHERE email = ?', (email,))
 
 
+# ---------- [OWNER: Tan Yu Zhe] tasks W3 ----------
+
+# Every task comes back with its subject's code, colour and weight (JOIN), so pages
+# and Kong's task_score() do not need a second query.
+_TASK_SELECT = """
+    SELECT t.*, s.code AS subject_code, s.color AS subject_color, s.weight AS subject_weight
+    FROM tasks t JOIN subjects s ON s.id = t.subject_id
+"""
+
+
+def list_tasks(user_id):
+    return _all(_TASK_SELECT + ' WHERE t.user_id = ? ORDER BY t.due, t.id', (user_id,))
+
+
+def get_task(user_id, task_id):
+    return _one(_TASK_SELECT + ' WHERE t.id = ? AND t.user_id = ?', (task_id, user_id))
+
+
+def add_task(user_id, fields):
+    """Saves a new task and returns its id."""
+    db = get_db()
+    cursor = db.execute(
+        'INSERT INTO tasks (user_id, subject_id, name, description, type, due, priority, est_hours) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        (user_id, fields['subject_id'], fields['name'], fields['description'],
+         fields['type'], fields['due'], fields['priority'], fields['est_hours']),
+    )
+    db.commit()
+    return cursor.lastrowid
+
+
+def update_task(user_id, task_id, fields):
+    """AND user_id = ? means you can only edit your own tasks."""
+    db = get_db()
+    db.execute(
+        'UPDATE tasks SET subject_id = ?, name = ?, description = ?, type = ?, due = ?, priority = ?, '
+        'est_hours = ? WHERE id = ? AND user_id = ?',
+        (fields['subject_id'], fields['name'], fields['description'], fields['type'],
+         fields['due'], fields['priority'], fields['est_hours'], task_id, user_id),
+    )
+    db.commit()
+
+
+def delete_task(user_id, task_id):
+    db = get_db()
+    db.execute('DELETE FROM tasks WHERE id = ? AND user_id = ?', (task_id, user_id))
+    db.commit()
+
 # ---------- [OWNER: Tan Yu Zhe] subjects ----------
 
 def list_subjects(user_id):

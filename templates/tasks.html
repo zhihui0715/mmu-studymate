@@ -1,0 +1,56 @@
+{# tasks.html - task list with add, edit, delete.               [OWNER: Tan Yu Zhe]
+   W3 version: form and list. W4 replaces the list with the kanban columns. #}
+{% extends "base.html" %}
+{% block title %}Tasks{% endblock %}
+{% block content %}
+<div class="row">
+  <h2>Tasks</h2>
+  {% if editing %}<a class="btn g" href="{{ url_for('tasks.tasks') }}">Close</a>{% else %}<a class="btn" href="{{ url_for('tasks.tasks', new=1) }}">+ Add</a>{% endif %}
+</div>
+<p class="sub">Earliest due date first.</p>
+
+<!-- add / edit form (the same form for both; a hidden id means "edit") -->
+{% if editing and form_task %}
+<form class="card" method="post" action="{{ url_for('tasks.task_save') }}" novalidate>
+  <b>{{ 'New task' if editing == 'new' else 'Edit task' }}</b>
+  {% if editing != 'new' %}<input type="hidden" name="id" value="{{ editing }}" />{% endif %}
+  <label class="fl">Name<input name="name" maxlength="120" value="{{ form_task.name }}" /></label>
+  <label class="fl">Description<textarea name="description" rows="3" maxlength="500" placeholder="What exactly needs to be done?">{{ form_task.description }}</textarea></label>
+  <div class="g4" style="text-align: left">
+    <label class="fl">Type
+      <select name="type">{% for t in task_types %}<option{% if t == form_task.type %} selected{% endif %}>{{ t }}</option>{% endfor %}</select>
+    </label>
+    <label class="fl">Subject
+      <select name="subject_id">{% for s in subjects %}<option value="{{ s.id }}"{% if s.id == form_task.subject_id %} selected{% endif %}>{{ s.code }}</option>{% endfor %}</select>
+    </label>
+    <label class="fl">Due date<input name="due" type="date" value="{{ form_task.due }}" /></label>
+    <label class="fl">Priority
+      <select name="priority">{% for p in priorities %}<option{% if p == form_task.priority %} selected{% endif %}>{{ p }}</option>{% endfor %}</select>
+    </label>
+  </div>
+  <label class="fl" style="max-width: 260px">Estimated study time (hours, 0 = not planned)
+    <input name="est_hours" type="number" min="0" max="{{ max_hours }}" step="0.5" value="{{ form_task.est_hours }}" />
+  </label>
+  <div class="err" role="alert">{{ error }}</div>
+  <button class="btn">Save task</button>
+</form>
+{% endif %}
+
+<!-- the list -->
+{% for task in tasks %}
+<div class="card task">
+  <div class="t">{{ task.name }}
+    <div class="mu"><span class="dot" style="background: {{ task.subject_color }}"></span>{{ task.subject_code }} · {{ task.type }} · due {{ task.due }}{% if task.est_hours %} · est {{ '%g'|format(task.est_hours) }} h{% endif %}</div>
+    {% if task.description %}<div class="ds">{{ task.description }}</div>{% endif %}
+  </div>
+  <span class="pri">{{ task.priority }}</span>
+  <a class="btn g" style="padding: 2px 12px" href="{{ url_for('tasks.tasks', edit=task.id) }}">Edit</a>
+  <form method="post" action="{{ url_for('tasks.task_delete', task_id=task.id) }}" style="display: inline"
+        onsubmit="return confirm('Delete this task?')">
+    <button class="del" aria-label="Delete task {{ task.name }}">✕</button>
+  </form>
+</div>
+{% else %}
+<div class="card mu">No tasks yet. Press + Add to create your first one.</div>
+{% endfor %}
+{% endblock %}
